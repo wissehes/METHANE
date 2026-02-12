@@ -9,49 +9,25 @@ import SwiftUI
 
 struct ReportView: View {
     var type: MethaneType
-    
-    @State private var selectedDate: Date = .now
-    @State private var selectedEthane: EthaneType = .standby
-    
-    enum EthaneType: String, CaseIterable, Identifiable {
-        var id: Self {
-            return self
-        }
-        
-        case standby = "Major incident STANDBY"
-        case declared = "Major incident DECLARED"
-    }
+    @Binding var reports: [StoredReport]
     
     var body: some View {
-        List {
-            Section("Date") {
-                DatePicker("Date", selection: $selectedDate)
-            }
-            
-            Section("ETHANE") {
-                Picker("ETHANE", selection: $selectedEthane) {
-                    ForEach(EthaneType.allCases) { ethaneType in
-                        Text(ethaneType.rawValue)
-                            .tag(ethaneType)
-                    }
-                }.pickerStyle(.inline)
-                    .labelsHidden()
-            }
-            
-            
-        }.navigationTitle(type.title)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Now") {
-                        selectedDate = .now
-                    }.buttonStyle(.glassProminent)
-                }
-            }
+        MajorIncidentReport(saveReport: saveReport(report:))
+    }
+    
+    func saveReport(report: StoredReport) {
+        let existingReportIdx = reports.firstIndex(where: { $0.type == type })
+        
+        if let idx = existingReportIdx {
+            reports.remove(at: idx)
+        }
+        
+        reports.append(report)
     }
 }
 
 #Preview {
     NavigationStack {
-        ReportView(type: .hazards)
+        ReportView(type: .hazards, reports: .constant([]))
     }
 }

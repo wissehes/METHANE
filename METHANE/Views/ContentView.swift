@@ -9,32 +9,41 @@ import SwiftUI
 
 struct ContentView: View {
     
+    @State private var storedReports: [StoredReport] = []
+    @State private var path = NavigationPath()
+    
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             List {
                 ForEach(MethaneType.allCases, id: \.self) { type in
                     NavigationLink(value: ViewType.report(type: type)) {
-                        listItem(type.title.prefix(1).uppercased(), text: type.title)
+                        listItem(type)
+                            .swipeActions {
+                                Button("Clear", systemImage: "trash") {
+                                    storedReports = storedReports.filter({ $0.type != type })
+                                }.tint(.red)
+                            }
                     }
                 }
             }.navigationTitle("METHANE")
                 .navigationDestination(for: ViewType.self) { view in
                     switch view {
-                        case .report(type: let type): ReportView(type: type)
+                        case .report(type: let type): ReportView(type: type, reports: $storedReports)
                     }
                 }
         }
     }
     
-    func listItem(_ letter: String, text: String) -> some View {
+    func listItem(_ type: MethaneType) -> some View {
         let rectangleSize: CGFloat = 50
+        let associatedReport = storedReports.first(where: { $0.type == type })
         
         return HStack {
             ZStack {
                 RoundedRectangle(cornerRadius: 5)
-                    .fill(.red)
+                    .fill(associatedReport != nil ? Color.green : Color .red)
                     .frame(width: rectangleSize, height: rectangleSize)
-                Text(letter)
+                Text(type.title.prefix(1).uppercased())
                     .font(Font.largeTitle.bold())
                     .foregroundStyle(Color.white)
             }
@@ -42,8 +51,15 @@ struct ContentView: View {
             Spacer()
                 .frame(width: 10)
             
-            Text(text)
-                .font(.headline)
+            VStack(alignment: .leading) {
+                Text(type.title)
+                    .font(.headline)
+                
+                if let report = associatedReport, !report.text.isEmpty {
+                    Text(report.text)
+                }
+                
+            }
             
         }
     }
