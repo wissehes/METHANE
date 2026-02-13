@@ -12,7 +12,12 @@ struct ReportView: View {
     @Binding var reports: [StoredReport]
     
     var body: some View {
-        MajorIncidentReport(saveReport: saveReport(report:))
+        switch type {
+        case .majorIncident: MajorIncidentReport(saveReport: saveReport(report:))
+        case .exactLocation: LocationReport(saveReport: saveReport(report:))
+            
+        default: EmptyView()
+        }
     }
     
     func saveReport(report: StoredReport) {
@@ -28,6 +33,6 @@ struct ReportView: View {
 
 #Preview {
     NavigationStack {
-        ReportView(type: .hazards, reports: .constant([]))
+        ReportView(type: .exactLocation, reports: .constant([]))
     }
 }
