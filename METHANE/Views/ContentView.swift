@@ -10,10 +10,10 @@ import SwiftUI
 struct ContentView: View {
     
     @State private var storedReports: [StoredReport] = []
-    @State private var path = NavigationPath()
+    @State private var navigation = Navigation()
     
     var body: some View {
-        NavigationStack(path: $path) {
+        NavigationStack(path: $navigation.path) {
             List {
                 ForEach(MethaneType.allCases, id: \.self) { type in
                     NavigationLink(value: ViewType.report(type: type)) {
@@ -31,7 +31,7 @@ struct ContentView: View {
                         case .report(type: let type): ReportView(type: type, reports: $storedReports)
                     }
                 }
-        }
+        }.environment(\.navigation, navigation)
     }
     
     func listItem(_ type: MethaneType) -> some View {
@@ -57,6 +57,7 @@ struct ContentView: View {
                 
                 if let report = associatedReport, !report.text.isEmpty {
                     Text(report.text)
+                        .lineLimit(2)
                 }
                 
             }
