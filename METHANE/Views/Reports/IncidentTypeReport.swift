@@ -7,90 +7,6 @@
 
 import SwiftUI
 
-enum IncidentType: CaseIterable, Hashable {
-    case access
-    case attack
-    case crowd
-    case nature
-    case explosion
-    case fire
-    case industrial
-    case transportation
-    case water
-    case other
-
-    var text: LocalizedStringKey {
-        switch self {
-        case .access: return "Access"
-        case .attack: return "Attack"
-        case .crowd: return "Crowd"
-        case .nature: return "Nature"
-        case .explosion: return "Explosion"
-        case .fire: return "Fire"
-        case .industrial: return "Industrial"
-        case .transportation: return "Transportation"
-        case .water: return "Water"
-        case .other: return "Other"
-        }
-    }
-
-    var label: some View {
-        switch self {
-        case .access:
-            return Label(self.text, systemImage: "door.left.hand.open")
-        case .attack: return Label(self.text, systemImage: "figure.hunting")
-        case .crowd: return Label(self.text, systemImage: "person.wave.2")
-        case .nature: return Label(self.text, systemImage: "tornado")
-        case .explosion:
-            return Label(self.text, systemImage: "exclamationmark.circle")
-        case .fire: return Label(self.text, systemImage: "flame")
-        case .industrial:
-            return Label(
-                self.text,
-                systemImage: "building.2"
-            )
-        case .transportation:
-            return Label(self.text, systemImage: "car.2")
-        case .water: return Label(self.text, systemImage: "water.waves")
-        case .other:
-            return Label(self.text, systemImage: "questionmark.circle.dashed")
-        }
-    }
-    
-    var subTypes: [String] {
-        switch self {
-        case .access:
-            return [
-                "Maritime transport",
-                "Collapsed structure",
-                "Flood/water access",
-                "Seating collapse",
-                "Steep slope/angle",
-                "Confined space",
-                "Landslide"
-            ]
-        case .attack:
-            return []
-        case .crowd:
-            return []
-        case .nature:
-            return []
-        case .explosion:
-            return []
-        case .fire:
-            return []
-        case .industrial:
-            return []
-        case .transportation:
-            return []
-        case .water:
-            return []
-        case .other:
-            return []
-        }
-    }
-}
-
 struct IncidentLabelStyle: LabelStyle {
     private let rectangleSize: CGFloat = 50
 
@@ -112,12 +28,16 @@ struct IncidentLabelStyle: LabelStyle {
 }
 
 struct IncidentTypeReport: View {
+    var saveReport: (_ report: StoredReport) -> Void
+
     private let reportType: MethaneType = .typeOfIncident
     
     @Environment(\.navigation) var navigation
     
     @State private var selectedType: IncidentType? = nil
     @State private var selectedSubType: String? = nil
+    
+    @State private var otherInputField = ""
 
     var body: some View {
         List {
@@ -137,9 +57,14 @@ struct IncidentTypeReport: View {
                     }
                 }
             }
+            
         }.navigationTitle(reportType.title)
             .navigationDestination(for: IncidentType.self) { type in
-                subMenuView(for: type)
+                if type == .other {
+                    otherInput
+                } else {
+                    subMenuView(for: type)
+                }
             }
     }
 
@@ -147,12 +72,33 @@ struct IncidentTypeReport: View {
         List {
             ForEach(type.subTypes, id: \.self) { subType in
                 Button(subType) {
-                    self.selectedType = type
-                    self.selectedSubType = subType
-                    navigation.path.removeLast()
+                    saveSubType(type: type, subType: subType)
                 }
             }
         }.navigationTitle(type.text)
+    }
+    
+    var otherInput: some View {
+        Form {
+            TextField("Other type", text: $otherInputField)
+            Button("Save") {
+                saveSubType(type: .other, subType: otherInputField)
+            }.disabled(otherInputField.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        }.navigationTitle(IncidentType.other.text)
+    }
+    
+    func saveSubType(type: IncidentType, subType: String) {
+        self.selectedType = type
+        self.selectedSubType = subType
+        
+        let newReport = StoredReport(
+            id: .init(),
+            type: reportType,
+            textData: subType
+        )
+        saveReport(newReport)
+        
+        navigation.path = NavigationPath()
     }
 }
 
@@ -160,6 +106,6 @@ struct IncidentTypeReport: View {
     @Previewable @State var navigation = Navigation()
 
     NavigationStack(path: $navigation.path) {
-        IncidentTypeReport()
+        IncidentTypeReport(saveReport: { _ in })
     }.environment(\.navigation, navigation)
 }

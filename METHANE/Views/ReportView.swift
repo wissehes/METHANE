@@ -21,7 +21,7 @@ struct ReportView: View {
         switch type {
         case .majorIncident: MajorIncidentReport(saveReport: saveReport(report:))
         case .exactLocation: LocationReport(saveReport: saveReport(report:), initialReport: associatedReport)
-        case .typeOfIncident: IncidentTypeReport()
+        case .typeOfIncident: IncidentTypeReport(saveReport: saveReport(report:))
             
         default: defaultView
         }
