@@ -59,9 +59,7 @@ struct ContentView: View {
                     Text(report.text)
                         .lineLimit(2)
                 }
-                
             }
-            
         }
     }
 }
