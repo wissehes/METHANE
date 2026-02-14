@@ -29,7 +29,7 @@ struct IncidentLabelStyle: LabelStyle {
 
 struct IncidentTypeReport: View {
     var saveReport: (_ report: StoredReport) -> Void
-
+    
     private let reportType: MethaneType = .typeOfIncident
     
     @Environment(\.navigation) var navigation
@@ -38,22 +38,44 @@ struct IncidentTypeReport: View {
     @State private var selectedSubType: String? = nil
     
     @State private var otherInputField = ""
-
+    
+    @State private var searchInput: String = ""
+    @State private var isSearchActive: Bool = false
+    
+    var searchResults: [String] {
+        if searchInput.isEmpty {
+            return IncidentType.allSubTypes
+        }
+        
+        return IncidentType.allSubTypes.filter { $0.localizedCaseInsensitiveContains(searchInput) }.unique()
+    }
+    
     var body: some View {
         List {
 
-            if let selectedType, let selectedSubType {
+            if let selectedType, let selectedSubType, !isSearchActive {
                 Section("Selected") {
                     Text(selectedType.text)
                     Text("Sub-type: \(selectedSubType)")
                 }
             }
 
-            Section {
-                ForEach(IncidentType.allCases, id: \.hashValue) { type in
-                    NavigationLink(value: type) {
-                        type.label
-                            .labelStyle(IncidentLabelStyle())
+            if !isSearchActive {
+                Section {
+                    ForEach(IncidentType.allCases, id: \.hashValue) { type in
+                        NavigationLink(value: type) {
+                            type.label
+                                .labelStyle(IncidentLabelStyle())
+                        }
+                    }
+                }
+            }
+            
+            if isSearchActive {
+                ForEach(searchResults, id: \.self) { subType in
+                    Button(subType) {
+                        saveSubType(type: .other, subType: subType)
+                        isSearchActive = false
                     }
                 }
             }
@@ -66,6 +88,7 @@ struct IncidentTypeReport: View {
                     subMenuView(for: type)
                 }
             }
+            .searchable(text: $searchInput, isPresented: $isSearchActive)
     }
 
     func subMenuView(for type: IncidentType) -> some View {

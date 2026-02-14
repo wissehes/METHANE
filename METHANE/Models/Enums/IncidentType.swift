@@ -58,7 +58,7 @@ enum IncidentType: CaseIterable, Hashable {
         }
     }
     
-    static var allSubTypes: [String] = Self.allCases.flatMap(\.subTypes)
+    static var allSubTypes: [String] = Self.allCases.flatMap(\.subTypes).sorted()
     
     var subTypes: [String] {
         switch self {
