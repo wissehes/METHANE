@@ -7,15 +7,22 @@
 
 import Foundation
 
-struct StoredReport {
+struct StoredReport: Hashable {
     var id: UUID
     var type: MethaneType
 
+    // For reports where only text is enough
+    var textData: String?
+    
+    
+    // Major Incident Report date value
     var date: Date?
     
     var text: String {
-        if let date = date {
+        if let date {
             return date.formatted()
+        } else if let textData {
+            return textData
         }
         
         return ""
