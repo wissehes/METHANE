@@ -32,11 +32,15 @@ struct ReportView: View {
     func saveReport(report: StoredReport) {
         let existingReportIdx = reports.firstIndex(where: { $0.type == type })
         
+        // Remove existing report
         if let idx = existingReportIdx {
             reports.remove(at: idx)
         }
         
-        reports.append(report)
+        // Add the new report *if* not empty
+        if !report.text.isEmpty {
+            reports.append(report)
+        }
     }
     
     var defaultView: some View {
