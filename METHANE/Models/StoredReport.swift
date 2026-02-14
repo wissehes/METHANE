@@ -14,15 +14,19 @@ struct StoredReport: Hashable {
     // For reports where only text is enough
     var textData: String?
     
-    
     // Major Incident Report date value
     var date: Date?
+    
+    // Hazards report data
+    var hazards: [String]?
     
     var text: String {
         if let date {
             return date.formatted()
         } else if let textData {
             return textData
+        } else if let hazards {
+            return hazards.joined(separator: ", ")
         }
         
         return ""

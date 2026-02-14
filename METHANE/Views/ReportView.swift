@@ -18,10 +18,12 @@ struct ReportView: View {
     }
     
     var body: some View {
+        // Show the correct report view for the type of report
         switch type {
         case .majorIncident: MajorIncidentReport(saveReport: saveReport(report:))
         case .exactLocation: LocationReport(saveReport: saveReport(report:), initialReport: associatedReport)
         case .typeOfIncident: IncidentTypeReport(saveReport: saveReport(report:))
+        case .hazards: HazardsReport(saveReport: saveReport(report:), initialReport: associatedReport)
             
         default: defaultView
         }
