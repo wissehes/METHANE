@@ -11,6 +11,8 @@ import CoreLocation
 
 struct LocationReport: View {
     var saveReport: (_ report: StoredReport) -> Void
+    var initialReport: StoredReport? = nil
+    
     private let reportType: MethaneType = .exactLocation
     
     @State private var locationManager = LocationManager()
@@ -44,6 +46,10 @@ struct LocationReport: View {
             .navigationBarTitleDisplayMode(.inline)
             .mapControls {
                 MapUserLocationButton()
+            }
+            .onAppear {
+                guard let textData = initialReport?.textData else { return }
+                textValue = textData
             }
             .onChange(of: locationManager.location, { oldValue, newValue in
                 guard let location = newValue, oldValue == nil else { return }
@@ -81,7 +87,7 @@ struct LocationReport: View {
                 Spacer()
                 
                 Button("Save") {
-                    // TODO
+                    save()
                 }.buttonStyle(.borderedProminent)
             }.padding([.top, .bottom], 10)
             
@@ -107,6 +113,18 @@ struct LocationReport: View {
         let coordinatesString = "lat: \(location.coordinate.latitude), lon: \(location.coordinate.longitude)"
         
         textValue += coordinatesString + "\n"
+    }
+    
+    func save() {
+        let newReport = StoredReport(
+            id: .init(),
+            type: reportType,
+            textData: textValue
+        )
+        
+        saveReport(newReport)
+        sheetShowing = false
+        dismiss()
     }
 }
 
